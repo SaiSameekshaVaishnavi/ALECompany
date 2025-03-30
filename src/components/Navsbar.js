@@ -8,7 +8,7 @@ function ResponsiveNavbar() {
       <Navbar bg="dark" expand="lg" className="mb-3">
         <Container fluid>
           <Navbar.Brand href="/">
-            ALE <i class="fab fa-typo3" />
+            ALE <i className="fab fa-typo3" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="offcanvasNavbar" />
           <Navbar.Offcanvas

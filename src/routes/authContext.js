@@ -1,5 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import React, { createContext, useState, useEffect } from "react";
 import { api } from "./refreshToken";
 import Employees from "./employees";
 
@@ -37,7 +36,7 @@ export const AuthProvider = ({ children }) => {
       });
       return response;
     } catch (err) {
-      return err.response?.data || { status: 500, message: "Login failed" };
+      return err.response?.data || { status: 500, message: "Registration failed" };
     }
   };
 
@@ -80,16 +79,19 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post("/logout"); // Call the backend to remove refreshToken
+      console.log("Logout in frontend authcontext function called");
+      await api.post("/logout", {}, { withCredentials: true }); // Call the backend to remove refreshToken
     } catch (error) {
       console.error("Logout failed", error);
     } finally {
       // Clear tokens from frontend
+      console.log("Logout in finally authcontext function called");
       localStorage.removeItem("token");
       localStorage.removeItem("roles");
       localStorage.removeItem("username");
       delete api.defaults.headers.common["Authorization"];
-      <Navigate to="/LoginData" replace />; // Redirect user after logout
+      console.log("Logout in replace authcontext function called");
+      window.location.replace("/"); // Redirect user after logout
     }
   };
 
@@ -140,5 +142,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);

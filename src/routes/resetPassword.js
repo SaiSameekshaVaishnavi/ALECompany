@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import { useSearchParams, Navigate } from "react-router-dom";
+import { useSearchParams} from "react-router-dom";
 import { AuthContext } from "./authContext";
 import "../css/resetPassword.css";
 
@@ -22,18 +22,13 @@ const ResetPassword = () => {
     const timeout = setTimeout(() => {
       if (success) {
         console.log("Success redirecting to login page", success);
-        // window.location.href = "/LoginData";
-        RedirectComponent();
+        window.location.replace("/LoginData");
       } else {
-        <Navigate to="/register" replace />;
+        window.location.replace("/register");
       }
-    }, 5000);
+    }, 10000);
     return () => clearTimeout(timeout); // Cleanup to prevent memory leaks
   }, [success]);
-
-  function RedirectComponent() {
-    return <Navigate to="/LoginData" replace />;
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +41,7 @@ const ResetPassword = () => {
       console.log("Reset Password Response:", response);
       if (response.status === 200) {
         const { msg, userName } = response.data;
+        console.log(msg);
         setMessage(
           `Password reset successfully for ${userName}. Redirecting...`
         );

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useCallback } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,30 +16,34 @@ import ForgotPassword from "./routes/forgotPassword";
 import ResetPassword from "./routes/resetPassword";
 import "./app.css";
 
-
 function App() {
   const { logout } = useContext(AuthContext); // This is valid inside a component
-  useEffect(() => {
-    setupInterceptors(logout); // Pass logout to interceptors
+
+  const handleLogout = useCallback(() => {
+    logout();
   }, [logout]);
 
   useEffect(() => {
-    initializeApp(logout);
-  }, []);
+    setupInterceptors(handleLogout); // Pass logout to interceptors
+  }, [handleLogout]);
 
-  async function initializeApp(logout) {
+  const initializeApp = useCallback(() => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         console.log("No token found, refreshing...");
-        setupInterceptors(logout);
+        setupInterceptors(handleLogout);
       }
     } catch (error) {
       console.error("Failed to initialize token:", error);
-      logout();
-      <Navigate to="/LoginData" replace />;
+      handleLogout();
+      window.location.href = "/LoginData";
     }
-  }
+  }, [handleLogout]);
+
+  useEffect(() => {
+    initializeApp();
+  }, [initializeApp]);
 
   return (
     <div>
@@ -52,7 +56,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace={true} />} />
         </Routes>
       </Router>
     </div>

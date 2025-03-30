@@ -40,7 +40,7 @@ function Contact() {
               name="email"
               type="email"
               placeholder="Your Email"
-            />
+            ></input>
             <button
               className="btna"
               type="submit"

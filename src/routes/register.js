@@ -12,22 +12,27 @@ function Register() {
   const [errorMessage, setErrorMessage] = useState("");
   const { register } = useContext(AuthContext);
   const [finalMessage, setFinalMessage] = useState("");
+
   function validateEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   }
+
   async function handleLogin(event) {
     event.preventDefault();
     setErrorMessage("");
     setFinalMessage("");
+
     if (!validateEmail(emailName)) {
       setErrorMessage("❌ Please enter a valid email.");
       return;
     }
+
     if (pwd !== currPwd) {
       setErrorMessage("❌ Passwords do not match!");
       return;
     }
+    
     try {
       const response = await register(user, pwd, emailName);
       if (response.status === 201) {
@@ -42,6 +47,7 @@ function Register() {
       setFinalMessage(errMsg || "❌ Registration Failed! Please Try Again");
     }
   }
+
   return (
     <div className="register">
       <div className="card">

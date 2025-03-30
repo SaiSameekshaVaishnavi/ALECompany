@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Contact from "./contact";
-import Button from "../components/Button"
 import "../css/mainpage.css";
 
 
@@ -14,7 +13,6 @@ function MainPage() {
     const observer = new IntersectionObserver(
       (entries, observer) => {
         entries.forEach((entry, index) => {
-          // const index=Array.from(elements).indexOf(entry.target);
           if (entry.isIntersecting) {
             if (index % 2 === 0) {
               entry.target.classList.add("slide-left");
@@ -39,17 +37,17 @@ function MainPage() {
     <div>
       <div className="main-page">
         <div className="content">
-          <Button className="btn">
+          <button className="btn">
             <Link to="/register" className="al">
              Register
             </Link>
-          </Button>
+          </button>
 
-          <Button className="btn">
+          <button className="btn">
             <Link to="/LoginData" className="al">
               Login
             </Link>
-          </Button>
+          </button>
         </div>
       </div>
       <Contact />

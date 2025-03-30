@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,37 +18,29 @@ import {
   Box,
   Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Add, Edit, Delete, Home, ExitToApp } from "@mui/icons-material";
 import { api } from "./refreshToken";
 import { AuthContext } from "./authContext";
-
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-
   const { token, logout } = useContext(AuthContext);
-
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const user = localStorage.getItem("username");
   const storedRoles = localStorage.getItem("roles");
   const roles = storedRoles ? JSON.parse(storedRoles) : {};
   const canAdd = roles["Admin"] !== undefined;
   const canUpdate =
     roles["Admin"] !== undefined || roles["Editor"] !== undefined;
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  useEffect(() => {
-    fetchEmployees();
-  }, [token]);
+  const actualToken = typeof token === "string" ? token : token?.accessToken;
 
   // Fetch employees from backend
-  const fetchEmployees = async () => {
-    const actualToken = typeof token === "string" ? token : token?.accessToken;
-    console.log("Extracted Token before API call:", actualToken);
+  const fetchEmployees = useCallback(async () => {
     if (!actualToken) {
       console.error("No valid token found!");
       return;
@@ -56,25 +48,22 @@ const EmployeeTable = () => {
     try {
       const response = await api.get("/employees", {
         headers: {
-          Authorization: `Bearer ${actualToken}`,
+          // Authorization: `Bearer ${actualToken}`,
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
         },
         withCredentials: true,
       });
-
-      console.log("Raw API Response:", response);
-
-      if (response.status !== 200) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
-
       const data = await response.data;
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
-  };
+  }, [actualToken]);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   // Handle Add Employee
   const handleAdd = async () => {
@@ -85,7 +74,7 @@ const EmployeeTable = () => {
       alert("Please enter both first name and last name");
       return;
     }
-    const actualToken = typeof token === "string" ? token : token?.accessToken;
+    // const actualToken = typeof token === "string" ? token : token?.accessToken;
     if (!actualToken) {
       alert("No valid token found!");
       return;
@@ -99,7 +88,7 @@ const EmployeeTable = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${actualToken}`,
+            // Authorization: `Bearer ${actualToken}`,
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
           },
@@ -130,8 +119,7 @@ const EmployeeTable = () => {
       alert("No employee selected!");
       return;
     }
-
-    const actualToken = typeof token === "string" ? token : token?.accessToken;
+    // const actualToken = typeof token === "string" ? token : token?.accessToken;
     if (!actualToken) {
       alert("No valid token found!");
       return;
@@ -147,7 +135,7 @@ const EmployeeTable = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${actualToken}`,
+            // Authorization: `Bearer ${actualToken}`,
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
           },
@@ -167,7 +155,7 @@ const EmployeeTable = () => {
   // Handle Delete Employee
   const handleDelete = async (_id) => {
     if (!canAdd) return alert("You don't have permission to delete employees!");
-    const actualToken = typeof token === "string" ? token : token?.accessToken;
+    // const actualToken = typeof token === "string" ? token : token?.accessToken;
     if (!actualToken) {
       alert("No valid token found!");
       return;
@@ -175,7 +163,7 @@ const EmployeeTable = () => {
     try {
       const response = await api.delete(`/employees/${_id}`, {
         headers: {
-          Authorization: `Bearer ${actualToken}`,
+          // Authorization: `Bearer ${actualToken}`,
           "Content-Type": "application/json",
         },
         withCredentials: true,
@@ -192,22 +180,44 @@ const EmployeeTable = () => {
   };
 
   const handleRedirect = () => {
-    window.location.href = "/";
+    window.location.replace("/");
   };
 
   const handleLogOut = async () => {
+    console.log("Logout in frontend employees function called");
     await logout();
   };
 
   return (
     <>
       {/* Fixed Navigation Bar */}
-      <AppBar position="fixed" sx={{ backgroundColor: "#1E88E5" }}>
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          backgroundColor: "#1E88E5",
+          minHeight: { xs: "auto", sm: "64px" },
+          padding: { xs: 2, sm: 1 },
+        }}
+      >
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "center",
+          }}
+        >
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
             Employee Portal
           </Typography>
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 1, sm: 2 },
+              marginTop: { xs: 1, sm: 0 },
+            }}
+          >
             <Button
               variant="contained"
               startIcon={<Home />}
@@ -237,7 +247,8 @@ const EmployeeTable = () => {
         </Toolbar>
       </AppBar>
 
-      <Container style={{ marginTop: 80 }}>
+      {/* <Box sx={{ ...theme.mixins.toolbar }} /> */}
+      <Container sx={{ marginTop: isSmallScreen ? "170px" : "100px" }}>
         {/* Greeting Section */}
         <Box mb={3}>
           <Paper
@@ -252,7 +263,7 @@ const EmployeeTable = () => {
             }}
           >
             <Typography variant="h4" fontWeight="bold">
-              Hello, {user} 👋
+              Hello, {user}
             </Typography>
           </Paper>
         </Box>
@@ -260,7 +271,7 @@ const EmployeeTable = () => {
         {/* Employee Management Title */}
         <Box textAlign="center" mt={3} mb={2}>
           <Typography variant="h5" fontWeight="bold">
-            Employee Management
+            Employee List
           </Typography>
         </Box>
 
@@ -282,21 +293,21 @@ const EmployeeTable = () => {
         ) : null}
 
         {/* Employee Table */}
-        <Box>
+        <Box sx={{ width: "100%", overflowX: "auto" }}>
           <Paper elevation={3} sx={{ padding: "10px", borderRadius: "8px" }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#EAEAEA" }}>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
                     <b>ID</b>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
                     <b>First Name</b>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
                     <b>Last Name</b>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
                     <b>Actions</b>
                   </TableCell>
                 </TableRow>
@@ -310,39 +321,57 @@ const EmployeeTable = () => {
                       "&:hover": { backgroundColor: "#F1F1F1" },
                     }}
                   >
-                    <TableCell>{emp.isd}</TableCell>
-                    <TableCell>{emp.firstname}</TableCell>
-                    <TableCell>{emp.lastname}</TableCell>
+                    <TableCell sx={{ fontSize: { xs: "0.75rem", sm: "1rem" } }}>
+                      {emp.isd}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: "0.75rem", sm: "1rem" } }}>
+                      {emp.firstname}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: "0.75rem", sm: "1rem" } }}>
+                      {emp.lastname}
+                    </TableCell>
                     <TableCell>
-                      {(canAdd || canUpdate) && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          startIcon={<Edit />}
-                          onClick={() => handleUpdate(emp)}
-                          sx={{
-                            marginRight: "8px",
-                            backgroundColor: "#1976D2",
-                            "&:hover": { backgroundColor: "#115293" },
-                          }}
-                        >
-                          Update
-                        </Button>
-                      )}
-                      {canAdd && (
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          startIcon={<Delete />}
-                          onClick={() => handleDelete(emp._id)}
-                          sx={{
-                            backgroundColor: "#D32F2F",
-                            "&:hover": { backgroundColor: "#B71C1C" },
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      )}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "8px",
+                          justifyContent: { xs: "center", sm: "flex-start" },
+                        }}
+                      >
+                        {(canAdd || canUpdate) && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Edit />}
+                            onClick={() => handleUpdate(emp)}
+                            sx={{
+                              fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                              padding: { xs: "4px 6px", sm: "6px 12px" },
+                              backgroundColor: "#1976D2",
+                              "&:hover": { backgroundColor: "#115293" },
+                            }}
+                          >
+                            Update
+                          </Button>
+                        )}
+                        {canAdd && (
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            startIcon={<Delete />}
+                            onClick={() => handleDelete(emp._id)}
+                            sx={{
+                              fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                              padding: { xs: "4px 6px", sm: "6px 12px" },
+                              backgroundColor: "#D32F2F",
+                              "&:hover": { backgroundColor: "#B71C1C" },
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -358,6 +387,8 @@ const EmployeeTable = () => {
             <TextField
               label="First Name"
               fullWidth
+              margin="dense"
+              sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}
               value={selectedEmployee?.firstname || ""}
               onChange={(e) =>
                 setSelectedEmployee({
@@ -365,7 +396,6 @@ const EmployeeTable = () => {
                   firstname: e.target.value,
                 })
               }
-              sx={{ marginBottom: 2 }}
             />
             <TextField
               label="Last Name"
@@ -377,7 +407,8 @@ const EmployeeTable = () => {
                   lastname: e.target.value,
                 })
               }
-              sx={{ marginBottom: 2 }}
+              margin="dense"
+              sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}
             />
           </DialogContent>
           <DialogActions>

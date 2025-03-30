@@ -23,7 +23,7 @@ async function RefreshAccessToken(logout) {
     if (error.response && error.response.status === 403) {
       console.log("Refresh token expired. Logging out.");
       logout();
-      window.location.href = "/login";
+      window.location.replace("/login");
     }
     throw error; // Ensure the error is handled correctly
   }
@@ -35,7 +35,7 @@ function setupInterceptors(logout) {
     async (error) => {
       const originalRequest = error.config;
       if (
-        originalRequest.url === "/auth" ||
+        originalRequest.url === "/LoginData" ||
         originalRequest.url === "/register"
       ) {
         return Promise.reject(error); // Don't attempt token refresh for login or registration
@@ -43,15 +43,14 @@ function setupInterceptors(logout) {
       if (error.response) {
         if (error.response.status === 401) {
           console.log("401 Unauthorized - Redirecting to login...");
-          logout();
-          window.location.href = "/login"; // Redirect to login page
+          await logout();
+          window.location.replace("/login"); // Redirect to login page
           return Promise.reject(error);
         }
 
         if (error.response.status === 403 && !originalRequest._retry) {
           originalRequest._retry = true;
           console.log("Access token expired, attempting to refresh...");
-
           try {
             const { newToken, username, roles } = await RefreshAccessToken(
               logout
@@ -65,8 +64,8 @@ function setupInterceptors(logout) {
             return api(originalRequest); // Retry failed request
           } catch (refreshError) {
             console.error("Token refresh failed, logging out...");
-            logout();
-            window.location.href = "/login";
+            await logout();
+            window.location.replace("/login");
             return Promise.reject(refreshError); // Reject if refresh fails
           }
         }
