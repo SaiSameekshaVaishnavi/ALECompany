@@ -1,0 +1,100 @@
+.main-page {
+    background: url("../../images/main-bg.jpg");
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    object-fit: contain;
+}
+
+.content {
+    width: 80vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5rem;
+    margin-bottom: 9%;
+}
+
+.btn {
+    width: 10vw;
+    height: 8vh;
+    background-color: white !important;
+    border: 2px solid black !important;
+    cursor: pointer;
+    border-radius: 15px;
+}
+
+.slide-left {
+    transform: translateX(-100%);
+    animation: slideInLeft 1.5s forwards;
+}
+
+.slide-right {
+    transform: translateX(100%);
+    animation: slideInRight 1.5s forwards;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.al {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn:hover {
+    transition: all 0.3s ease-out;
+    background-color: #000 !important;
+    color: #242424;
+    transition: 250ms;
+    border: 2px soild #fff !important;
+}
+
+.btn:hover .al {
+    color: wheat !important;
+}
+
+@media screen and (max-width:1024px) {
+    .content {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 46%;
+    }
+}
